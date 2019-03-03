@@ -14,7 +14,7 @@ define('DOCUMENT_ROOT', dirname(__FILE__) . '/../');
 define('CLASSGENERATOR_DIR', DOCUMENT_ROOT . '_class/');
 
 define('dbhostname', 'localhost');
-define('dbdatabase', 'library');
+define('dbdatabase', 'bethesda_mission');
 define('dbusername', 'root');
 define('dbpassword', '');
 define('dbtype', 'mysql');

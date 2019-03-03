@@ -1,6 +1,6 @@
 <?php
 
-include_once '_system/_config.inc.php';
+require_once '_system/_config.inc.php';
 
 define('INPUT_EXCEPTION', 'Input error : Please fill in all required fields (*).');
 define('NO_EXCEPTION', 'All classes corresponding to your database have been successfully generated');
@@ -32,6 +32,13 @@ if ($generate===TRUE) {
 	if ($message == '') {
 		$message = NO_EXCEPTION;
 	}
+}
+
+try {
+    $dbh = new PDO('mysql:host=' . dbhostname . ';dbname=' . dbdatabase, dbusername, dbpassword);
+} catch (PDOException $e) {
+    print "Error!: " . $e->getMessage() . "<br/>";
+    die();
 }
 
 if (php_sapi_name() !== 'cli') {
