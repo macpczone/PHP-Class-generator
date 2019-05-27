@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class JobsAssignmentDB {
 
@@ -38,17 +39,18 @@ class JobsAssignmentDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($job_id = null, $employee_id = null, $assignment_date = null) {
-		$item = new jobs_assignment();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_job_id($job_id);
 		$item->set_employee_id($employee_id);
 		$item->set_assignment_date($assignment_date);
@@ -62,7 +64,7 @@ class JobsAssignmentDB {
 			$this->get_assignment_date(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->job_id) {
 			$sql = "INSERT INTO jobs_assignment(job_id, employee_id, assignment_date) VALUES (null, ?, ?)";
 		} else {
 			$sql = "UPDATE jobs_assignment SET job_id = ?, employee_id = ?, assignment_date = ? WHERE job_id = ?";
@@ -73,7 +75,7 @@ class JobsAssignmentDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -87,7 +89,7 @@ class JobsAssignmentDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->job_id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

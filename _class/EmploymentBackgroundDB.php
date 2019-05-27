@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EmploymentBackgroundDB {
 
@@ -86,17 +87,18 @@ class EmploymentBackgroundDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($id = null, $applicant_id = null, $employee_id = null, $from_date = null, $to_date = null, $institution = null, $job_title = null, $reason_for_leaving = null, $supervisor_name = null) {
-		$item = new employment_background();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_id($id);
 		$item->set_applicant_id($applicant_id);
 		$item->set_employee_id($employee_id);
@@ -122,7 +124,7 @@ class EmploymentBackgroundDB {
 			$this->get_supervisor_name(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->id) {
 			$sql = "INSERT INTO employment_background(id, applicant_id, employee_id, from_date, to_date, institution, job_title, reason_for_leaving, supervisor_name) VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE employment_background SET id = ?, applicant_id = ?, employee_id = ?, from_date = ?, to_date = ?, institution = ?, job_title = ?, reason_for_leaving = ?, supervisor_name = ? WHERE id = ?";
@@ -133,7 +135,7 @@ class EmploymentBackgroundDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -147,7 +149,7 @@ class EmploymentBackgroundDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

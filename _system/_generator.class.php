@@ -38,7 +38,8 @@ class ClassGenerator
 
                 $content = "<?php\n\n";
                 $content .= "namespace App\Libraries;\n\n";
-                $content .= "use Illuminate\Support\Facades\DB;\n\n";
+                $content .= "use Illuminate\Support\Facades\DB;\n";
+                $content .= "use Illuminate\Support\Facades\Log;\n\n";
 
                 /***********************************************************************
                  * CLASS
@@ -94,18 +95,19 @@ class ClassGenerator
                 $content .= "\t\t\t \$dbh = DB::getPdo(); \n";
                 $content .= "\t\t\t \$sth = \$dbh->prepare(\$sql); \n";
                 $content .= "\t\t\t \$sth->execute(\$params); \n";
-                $content .= "\t\t} catch(PDOException \$e) {\n";
+                $content .= "\t\t} catch(\PDOException \$e) {\n";
                 $content .= "\t\t\tLog::info(\$sql); \n";
                 $content .= "\t\t\tLog::info(\"Failed to execute query\"); \n";
                 $content .= "\t\t\treturn false; \n";
                 $content .= "\t\t}\n\n";
                 
-                $content .= "\t\treturn \$sth->fetchAll(PDO::FETCH_CLASS, get_class());\n";
+                $content .= "\t\treturn \$sth->fetchAll(\PDO::FETCH_CLASS, get_class());\n";
                 $content .= "\t}\n\n";
 
                 // populate
                 $content .= "\tpublic static function populate(". implode(', ', $list_columns_var_val) .") {\n"; 
-                $content .= "\t\t\$item = new $table();\n";
+                $content .= "\t\t\$classname = get_class();\n";
+                $content .= "\t\t\$item = new \$classname();\n";
                 foreach ($columns as $column) {
                     $str_column = str_replace($this->str_replace_column, '', $column);
                     $content .= "\t\t\$item->set_$str_column($$str_column);\n";
@@ -127,7 +129,7 @@ class ClassGenerator
                 // id does not have value yet on insert
                 $list_as_question_marks[0] = "null";
 
-                $content .= "\t\tif (!\$this->\$list_columns[0]) {\n";
+                $content .= "\t\tif (!\$this->$list_columns[0]) {\n";
                 $content .= "\t\t\t\$sql = \"INSERT INTO $table(" . implode(', ', $list_columns) .") VALUES (". implode(', ', $list_as_question_marks) . ")\";\n";
                 $content .= "\t\t} else {\n";
                 $content .= "\t\t\t\$sql = \"UPDATE $table SET " . implode(', ', $list_as_equals) . " WHERE " . $list_columns[0] . " = ?\";\n"; 
@@ -138,7 +140,7 @@ class ClassGenerator
                 $content .= "\t\t\t\$dbh = DB::getPdo(); \n";
                 $content .= "\t\t\t\$stmt = \$dbh->prepare(\$sql);\n";
                 $content .= "\t\t\t\$stmt->execute(\$params);\n";
-                $content .= "\t\t} catch(PDOException \$e) {\n";
+                $content .= "\t\t} catch(\PDOException \$e) {\n";
                 $content .= "\t\t\tLog::info(\$sql); \n";
                 $content .= "\t\t\tLog::info(\"Failed to execute query\"); \n";
                 $content .= "\t\t\treturn false; \n";
@@ -155,7 +157,7 @@ class ClassGenerator
                 $content .= "\t\t\t\$dbh = DB::getPdo(); \n";
                 $content .= "\t\t\t\$stmt = \$dbh->prepare(\$sql);\n";
                 $content .= "\t\t\t\$stmt->execute(array(\$this->" . $list_columns[0] ."));\n";
-                $content .= "\t\t} catch(PDOException \$e) {\n";
+                $content .= "\t\t} catch(\PDOException \$e) {\n";
                 $content .= "\t\t\t Log::info(\$sql); \n";
                 $content .= "\t\t\t Log::info(\"Failed to execute query\"); \n";
                 $content .= "\t\t\t return false; \n";

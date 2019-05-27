@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DashboardDB {
 
@@ -30,17 +31,18 @@ class DashboardDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($admin_id = null, $dashboard_type = null) {
-		$item = new dashboard();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_admin_id($admin_id);
 		$item->set_dashboard_type($dashboard_type);
 		return $item;
@@ -52,7 +54,7 @@ class DashboardDB {
 			$this->get_dashboard_type(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->admin_id) {
 			$sql = "INSERT INTO dashboard(admin_id, dashboard_type) VALUES (null, ?)";
 		} else {
 			$sql = "UPDATE dashboard SET admin_id = ?, dashboard_type = ? WHERE admin_id = ?";
@@ -63,7 +65,7 @@ class DashboardDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -77,7 +79,7 @@ class DashboardDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->admin_id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

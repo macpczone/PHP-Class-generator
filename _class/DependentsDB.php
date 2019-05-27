@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DependentsDB {
 
@@ -78,17 +79,18 @@ class DependentsDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($id = null, $employee_id = null, $first_name = null, $mid_init = null, $last_name = null, $relationship = null, $date_of_birth = null, $ssn = null) {
-		$item = new dependents();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_id($id);
 		$item->set_employee_id($employee_id);
 		$item->set_first_name($first_name);
@@ -112,7 +114,7 @@ class DependentsDB {
 			$this->get_ssn(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->id) {
 			$sql = "INSERT INTO dependents(id, employee_id, first_name, mid_init, last_name, relationship, date_of_birth, ssn) VALUES (null, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE dependents SET id = ?, employee_id = ?, first_name = ?, mid_init = ?, last_name = ?, relationship = ?, date_of_birth = ?, ssn = ? WHERE id = ?";
@@ -123,7 +125,7 @@ class DependentsDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -137,7 +139,7 @@ class DependentsDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PermissionsDB {
 
@@ -30,17 +31,18 @@ class PermissionsDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($admin_id = null, $permission = null) {
-		$item = new permissions();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_admin_id($admin_id);
 		$item->set_permission($permission);
 		return $item;
@@ -52,7 +54,7 @@ class PermissionsDB {
 			$this->get_permission(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->admin_id) {
 			$sql = "INSERT INTO permissions(admin_id, permission) VALUES (null, ?)";
 		} else {
 			$sql = "UPDATE permissions SET admin_id = ?, permission = ? WHERE admin_id = ?";
@@ -63,7 +65,7 @@ class PermissionsDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -77,7 +79,7 @@ class PermissionsDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->admin_id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

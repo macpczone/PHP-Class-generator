@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EducationBackgroundDB {
 
@@ -78,17 +79,18 @@ class EducationBackgroundDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($id = null, $employee_id = null, $applicant_id = null, $from_date = null, $to_date = null, $institution = null, $degree_certification = null, $comments = null) {
-		$item = new education_background();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_id($id);
 		$item->set_employee_id($employee_id);
 		$item->set_applicant_id($applicant_id);
@@ -112,7 +114,7 @@ class EducationBackgroundDB {
 			$this->get_comments(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->id) {
 			$sql = "INSERT INTO education_background(id, employee_id, applicant_id, from_date, to_date, institution, degree_certification, comments) VALUES (null, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE education_background SET id = ?, employee_id = ?, applicant_id = ?, from_date = ?, to_date = ?, institution = ?, degree_certification = ?, comments = ? WHERE id = ?";
@@ -123,7 +125,7 @@ class EducationBackgroundDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -137,7 +139,7 @@ class EducationBackgroundDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

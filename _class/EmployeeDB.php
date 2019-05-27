@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EmployeeDB {
 
@@ -102,17 +103,18 @@ class EmployeeDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($id = null, $first_name = null, $mid_init = null, $last_name = null, $email = null, $date_of_birth = null, $employment_date = null, $status_date = null, $employment_status = null, $ssn = null, $created_date = null) {
-		$item = new employee();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_id($id);
 		$item->set_first_name($first_name);
 		$item->set_mid_init($mid_init);
@@ -142,7 +144,7 @@ class EmployeeDB {
 			$this->get_created_date(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->id) {
 			$sql = "INSERT INTO employee(id, first_name, mid_init, last_name, email, date_of_birth, employment_date, status_date, employment_status, ssn, created_date) VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE employee SET id = ?, first_name = ?, mid_init = ?, last_name = ?, email = ?, date_of_birth = ?, employment_date = ?, status_date = ?, employment_status = ?, ssn = ?, created_date = ? WHERE id = ?";
@@ -153,7 +155,7 @@ class EmployeeDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -167,7 +169,7 @@ class EmployeeDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

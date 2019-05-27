@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class QualificationDB {
 
@@ -70,17 +71,18 @@ class QualificationDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($id = null, $employee_id = null, $applicant_id = null, $degree_cert = null, $certification_id = null, $effective_date = null, $expiration_date = null) {
-		$item = new qualification();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_id($id);
 		$item->set_employee_id($employee_id);
 		$item->set_applicant_id($applicant_id);
@@ -102,7 +104,7 @@ class QualificationDB {
 			$this->get_expiration_date(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->id) {
 			$sql = "INSERT INTO qualification(id, employee_id, applicant_id, degree_cert, certification_id, effective_date, expiration_date) VALUES (null, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE qualification SET id = ?, employee_id = ?, applicant_id = ?, degree_cert = ?, certification_id = ?, effective_date = ?, expiration_date = ? WHERE id = ?";
@@ -113,7 +115,7 @@ class QualificationDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -127,7 +129,7 @@ class QualificationDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class FacilityDB {
 
@@ -62,17 +63,18 @@ class FacilityDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($id = null, $facility_name = null, $location_state = null, $location_city = null, $manager_employee_id = null, $created_date = null) {
-		$item = new facility();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_id($id);
 		$item->set_facility_name($facility_name);
 		$item->set_location_state($location_state);
@@ -92,7 +94,7 @@ class FacilityDB {
 			$this->get_created_date(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->id) {
 			$sql = "INSERT INTO facility(id, facility_name, location_state, location_city, manager_employee_id, created_date) VALUES (null, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE facility SET id = ?, facility_name = ?, location_state = ?, location_city = ?, manager_employee_id = ?, created_date = ? WHERE id = ?";
@@ -103,7 +105,7 @@ class FacilityDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -117,7 +119,7 @@ class FacilityDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

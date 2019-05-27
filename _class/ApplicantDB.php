@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ApplicantDB {
 
@@ -110,17 +111,18 @@ class ApplicantDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($id = null, $first_name = null, $last_name = null, $mid_init = null, $email = null, $date_of_birth = null, $ssn = null, $created_date = null, $password = null, $selector = null, $token = null, $expires = null) {
-		$item = new applicant();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_id($id);
 		$item->set_first_name($first_name);
 		$item->set_last_name($last_name);
@@ -152,7 +154,7 @@ class ApplicantDB {
 			$this->get_expires(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->id) {
 			$sql = "INSERT INTO applicant(id, first_name, last_name, mid_init, email, date_of_birth, ssn, created_date, password, selector, token, expires) VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE applicant SET id = ?, first_name = ?, last_name = ?, mid_init = ?, email = ?, date_of_birth = ?, ssn = ?, created_date = ?, password = ?, selector = ?, token = ?, expires = ? WHERE id = ?";
@@ -163,7 +165,7 @@ class ApplicantDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -177,7 +179,7 @@ class ApplicantDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 

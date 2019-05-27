@@ -3,6 +3,7 @@
 namespace App\Libraries;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AdminDB {
 
@@ -86,17 +87,18 @@ class AdminDB {
 			 $dbh = DB::getPdo(); 
 			 $sth = $dbh->prepare($sql); 
 			 $sth->execute($params); 
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
 		}
 
-		return $sth->fetchAll(PDO::FETCH_CLASS, get_class());
+		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
 	public static function populate($id = null, $employee_id = null, $password = null, $status = null, $created_date = null, $test_account = null, $selector = null, $token = null, $expires = null) {
-		$item = new admin();
+		$classname = get_class();
+		$item = new $classname();
 		$item->set_id($id);
 		$item->set_employee_id($employee_id);
 		$item->set_password($password);
@@ -122,7 +124,7 @@ class AdminDB {
 			$this->get_expires(),
 		);
 
-		if (!$this->$list_columns[0]) {
+		if (!$this->id) {
 			$sql = "INSERT INTO admin(id, employee_id, password, status, created_date, test_account, selector, token, expires) VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE admin SET id = ?, employee_id = ?, password = ?, status = ?, created_date = ?, test_account = ?, selector = ?, token = ?, expires = ? WHERE id = ?";
@@ -133,7 +135,7 @@ class AdminDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute($params);
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			Log::info($sql); 
 			Log::info("Failed to execute query"); 
 			return false; 
@@ -147,7 +149,7 @@ class AdminDB {
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);
 			$stmt->execute(array($this->id));
-		} catch(PDOException $e) {
+		} catch(\PDOException $e) {
 			 Log::info($sql); 
 			 Log::info("Failed to execute query"); 
 			 return false; 
