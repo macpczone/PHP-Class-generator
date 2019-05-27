@@ -29,19 +29,22 @@ class ClassGenerator
             if (!in_array($table, $this->skip_table)) {
                 $class = str_replace($this->str_replace, '', $table);
                 $class = preg_replace('/[0-9]+/', '', $class);
-                if ($table == 'produit') {
-                    $this->str_replace_column = array(' ', '-');
-                } else {
-                    $this->str_replace_column = array(' ', 'fld_', '-');
+                $class = explode("_", $class);
+                $newClass = "";
+                foreach ($class as $c) {
+                    $newClass .= ucwords($c);
                 }
-                $content = '<?php' . NL . NL;
+                $class = $newClass . "DB";
+
+                $content = "<?php\n\n";
+                $content .= "namespace App\Libraries;\n\n";
+                $content .= "use Illuminate\Support\Facades\DB;\n\n";
 
                 /***********************************************************************
                  * CLASS
                  ************************************************************************/
-                $type = ($table_type == 'BASE TABLE') ? 'Table' : 'View';
-                $prefixe = ($table_type == 'BASE TABLE') ? '' : 'V_';
-                $content .= 'class ' . ucwords($class) . ' {' . NL . NL;
+        
+                $content .= "class $class {\n\n";
 
 
                 /***********************************************************************
@@ -61,83 +64,109 @@ class ClassGenerator
 
                 foreach ($columns as $column) {
                     $str_column = str_replace($this->str_replace_column, '', $column);
-                    $content .= TAB . 'private $' . $str_column . ' = null;' . NL;
-                    $list_columns_var_val[] = "$". $str_column . " = null";
-                    $list_columns_var[] = "$". $str_column;
+                    $content .= "\tprivate $$str_column = null;\n";
+                    $list_columns_var_val[] = "$$str_column = null";
+                    $list_columns_var[] = "$$str_column";
                     $list_columns[] = $str_column;
                 }
 
-                $content .= NL;
+                $content .= "\n";
    
                 foreach ($columns as $column) {
                     // setters
                     $str_column = str_replace($this->str_replace_column, '', $column);
-                    $content .= TAB . 'public function set_' . $str_column . '($'. $str_column .') {' . NL;
-                    $content .= TAB . TAB . '$this->' . $str_column . ' = $'. $str_column . ';' . NL;
-                    $content .= TAB . '}' . NL;
+                    $content .= "\tpublic function set_$str_column($$str_column) {\n";
+                    $content .= "\t\t\$this->$str_column = $$str_column;\n";
+                    $content .= "\t}\n";
                     // getters
                     $str_column = str_replace($this->str_replace_column, '', $column);
-                    $content .= TAB . 'public function get_' . $str_column . '() {' . NL;
-                    $content .= TAB . TAB . 'return $this->' . $str_column . ';' . NL;
-                    $content .= TAB . '}' . NL . NL;
+                    $content .= "\tpublic function get_$str_column() {\n";
+                    $content .= "\t\treturn \$this->$str_column;\n";
+                    $content .= "\t}\n\n";
                 }
                 
                 // lookup
-                $content .= TAB . 'public static function lookup($dbh, $where = 1, $params = array()) {' . NL;
-                $content .= TAB . TAB . '$sql = "SELECT '. implode(', ', $list_columns) .' FROM ' . $table . ' WHERE $where";' . NL;
-                $content .= TAB . TAB . '$stmt = $dbh->prepare($sql);' . NL;
-                $content .= TAB . TAB . '$stmt->execute($params);' . NL;
-                $content .= TAB . TAB . '$results = $stmt->fetchAll(PDO::FETCH_CLASS, \''. $table .'\');' . NL;
-                $content .= TAB . TAB . 'return $results;' . NL;
-                $content .= TAB . '}' . NL . NL;
+                $content .= "\tpublic static function lookup(\$where = '1', \$params = array()) {\n";
+                $content .= "\t\t\$sql = \"SELECT * FROM $table WHERE \$where\";\n\n";
+                
+                // try catch
+                $content .= "\t\ttry{\n";
+                $content .= "\t\t\t \$dbh = DB::getPdo(); \n";
+                $content .= "\t\t\t \$sth = \$dbh->prepare(\$sql); \n";
+                $content .= "\t\t\t \$sth->execute(\$params); \n";
+                $content .= "\t\t} catch(PDOException \$e) {\n";
+                $content .= "\t\t\tLog::info(\$sql); \n";
+                $content .= "\t\t\tLog::info(\"Failed to execute query\"); \n";
+                $content .= "\t\t\treturn false; \n";
+                $content .= "\t\t}\n\n";
+                
+                $content .= "\t\treturn \$sth->fetchAll(PDO::FETCH_CLASS, get_class());\n";
+                $content .= "\t}\n\n";
 
                 // populate
-                $content .= TAB . 'public static function populate('. implode(', ', $list_columns_var_val) .') {' . NL; 
-                $content .= TAB . TAB . '$item = new ' . $table . '();' . NL;
+                $content .= "\tpublic static function populate(". implode(', ', $list_columns_var_val) .") {\n"; 
+                $content .= "\t\t\$item = new $table();\n";
                 foreach ($columns as $column) {
                     $str_column = str_replace($this->str_replace_column, '', $column);
-                    $content .= TAB . TAB . '$item->set_' . $str_column . '($'. $str_column .');' . NL;
+                    $content .= "\t\t\$item->set_$str_column($$str_column);\n";
                 }
-                $content .= TAB . TAB . 'return $item;' . NL;
-                $content .= TAB . '}' . NL . NL;
+                $content .= "\t\treturn \$item;\n";
+                $content .= "\t}\n\n";
 
                 // write
-                $content .= TAB . 'public function write($dbh) {' . NL; 
-                $content .= TAB . TAB . '$params = array('. NL;
+                $content .= "\tpublic function write() {\n"; 
+                $content .= "\t\t\$params = array(\n";
                 foreach ($columns as $column) {
                     $str_column = str_replace($this->str_replace_column, '', $column);
-                    $content .= TAB . TAB . TAB . '$this->get_' . $str_column . '(),' . NL;
+                    $content .= "\t\t\t\$this->get_$str_column(),\n";
                     $list_as_equals[] = $str_column . ' = ?';
                     $list_as_question_marks[] = '?';
                 }
-                $content .= TAB . TAB . ');'. NL;
+                $content .= "\t\t);\n\n";
+                
+                // id does not have value yet on insert
+                $list_as_question_marks[0] = "null";
 
-                $content .= NL . TAB . TAB . 'if (!$this->' . $list_columns[0] . ') {';
-                $content .= NL . TAB . TAB . TAB .'$sql = "INSERT INTO '. $table . ' ('. implode(', ', $list_columns) .') 
-                    VALUES ('. implode(', ', $list_as_question_marks) .')";' . NL;
-                $content .= TAB . TAB . '} else {' . NL;
-                $content .= TAB . TAB . TAB . '$sql = "UPDATE '. $table . ' 
-                    SET ' . implode(', ', $list_as_equals) . ' 
-                    WHERE ' . $list_columns[0] . ' = ?";' . NL; 
-                $content .= TAB . TAB . TAB . '$params[] = $this->' . $list_columns[0] .';'. NL;
-                $content .= TAB . TAB . '}' . NL . NL;
+                $content .= "\t\tif (!\$this->\$list_columns[0]) {\n";
+                $content .= "\t\t\t\$sql = \"INSERT INTO $table(" . implode(', ', $list_columns) .") VALUES (". implode(', ', $list_as_question_marks) . ")\";\n";
+                $content .= "\t\t} else {\n";
+                $content .= "\t\t\t\$sql = \"UPDATE $table SET " . implode(', ', $list_as_equals) . " WHERE " . $list_columns[0] . " = ?\";\n"; 
+                $content .= "\t\t\t\$params[] = \$this->" . $list_columns[0] .";\n";
+                $content .= "\t\t}\n\n";
 
-                $content .= TAB . TAB . '$stmt = $dbh->prepare($sql);' . NL;
-                $content .= TAB . TAB . '$stmt->execute($params);' . NL;
-                $content .= TAB . '}' . NL . NL;
+                $content .= "\t\ttry{\n";
+                $content .= "\t\t\t\$dbh = DB::getPdo(); \n";
+                $content .= "\t\t\t\$stmt = \$dbh->prepare(\$sql);\n";
+                $content .= "\t\t\t\$stmt->execute(\$params);\n";
+                $content .= "\t\t} catch(PDOException \$e) {\n";
+                $content .= "\t\t\tLog::info(\$sql); \n";
+                $content .= "\t\t\tLog::info(\"Failed to execute query\"); \n";
+                $content .= "\t\t\treturn false; \n";
+                $content .= "\t\t}\n";
+                $content .= "\t\treturn true; \n";
+                
+                $content .= "\t}\n\n";
 
                 // delete
-                $content .= TAB . 'public function delete($dbh) {' . NL; 
-                $content .= TAB . TAB . '$params = array($this->' . $list_columns[0] .');'. NL;
-                $content .= TAB . TAB . '$sql = "DELETE FROM '. $table .' WHERE ' . $list_columns[0] . ' = ?";' . NL;
-                $content .= TAB . TAB . '$stmt = $dbh->prepare($sql);' . NL;
-                $content .= TAB . TAB . '$stmt->execute($params);' . NL;
-                $content .= TAB . '}' . NL;
+                $content .= "\tpublic function delete() {\n";
+                $content .= "\t\t\$sql = \"DELETE FROM $table WHERE $list_columns[0] = ?\";\n";
 
+                $content .= "\t\ttry{\n";
+                $content .= "\t\t\t\$dbh = DB::getPdo(); \n";
+                $content .= "\t\t\t\$stmt = \$dbh->prepare(\$sql);\n";
+                $content .= "\t\t\t\$stmt->execute(array(\$this->" . $list_columns[0] ."));\n";
+                $content .= "\t\t} catch(PDOException \$e) {\n";
+                $content .= "\t\t\t Log::info(\$sql); \n";
+                $content .= "\t\t\t Log::info(\"Failed to execute query\"); \n";
+                $content .= "\t\t\t return false; \n";
+                $content .= "\t\t}\n";
+                $content .= "\t\treturn true; \n";
+                $content .= "\t}\n";
+                
                 $content .= '}';
 
                 // Write file
-                $this->createClassFile($prefixe . str_replace($this->str_replace_file, '', $table), $content);
+                $this->createClassFile($class, $content);
             }
         }
     }
