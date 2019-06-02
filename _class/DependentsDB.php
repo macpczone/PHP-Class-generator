@@ -114,7 +114,9 @@ class DependentsDB {
 			$this->get_ssn(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO dependents(id, employee_id, first_name, mid_init, last_name, relationship, date_of_birth, ssn) VALUES (null, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE dependents SET id = ?, employee_id = ?, first_name = ?, mid_init = ?, last_name = ?, relationship = ?, date_of_birth = ?, ssn = ? WHERE id = ?";

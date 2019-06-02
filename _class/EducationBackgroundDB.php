@@ -114,7 +114,9 @@ class EducationBackgroundDB {
 			$this->get_comments(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO education_background(id, employee_id, applicant_id, from_date, to_date, institution, degree_certification, comments) VALUES (null, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE education_background SET id = ?, employee_id = ?, applicant_id = ?, from_date = ?, to_date = ?, institution = ?, degree_certification = ?, comments = ? WHERE id = ?";

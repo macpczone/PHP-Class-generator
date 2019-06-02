@@ -94,7 +94,9 @@ class FacilityDB {
 			$this->get_created_date(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO facility(id, facility_name, location_state, location_city, manager_employee_id, created_date) VALUES (null, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE facility SET id = ?, facility_name = ?, location_state = ?, location_city = ?, manager_employee_id = ?, created_date = ? WHERE id = ?";

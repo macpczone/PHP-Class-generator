@@ -114,7 +114,9 @@ class AddressDB {
 			$this->get_zip_code(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO address(id, employee_id, applicant_id, addr1, addr2, city, state, zip_code) VALUES (null, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE address SET id = ?, employee_id = ?, applicant_id = ?, addr1 = ?, addr2 = ?, city = ?, state = ?, zip_code = ? WHERE id = ?";

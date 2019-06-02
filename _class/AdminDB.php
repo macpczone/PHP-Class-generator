@@ -124,7 +124,9 @@ class AdminDB {
 			$this->get_expires(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO admin(id, employee_id, password, status, created_date, test_account, selector, token, expires) VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE admin SET id = ?, employee_id = ?, password = ?, status = ?, created_date = ?, test_account = ?, selector = ?, token = ?, expires = ? WHERE id = ?";

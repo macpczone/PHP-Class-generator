@@ -84,7 +84,9 @@ class JobPositionDB {
 			$this->get_created_date(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO job_position(id, job_title, description, facility_id, created_date) VALUES (null, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE job_position SET id = ?, job_title = ?, description = ?, facility_id = ?, created_date = ? WHERE id = ?";

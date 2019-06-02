@@ -94,7 +94,9 @@ class PhoneInformationDB {
 			$this->get_phone_type(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO phone_information(id, employee_id, applicant_id, phone_number, extension, phone_type) VALUES (null, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE phone_information SET id = ?, employee_id = ?, applicant_id = ?, phone_number = ?, extension = ?, phone_type = ? WHERE id = ?";

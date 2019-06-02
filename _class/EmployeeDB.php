@@ -144,7 +144,9 @@ class EmployeeDB {
 			$this->get_created_date(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO employee(id, first_name, mid_init, last_name, email, date_of_birth, employment_date, status_date, employment_status, ssn, created_date) VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE employee SET id = ?, first_name = ?, mid_init = ?, last_name = ?, email = ?, date_of_birth = ?, employment_date = ?, status_date = ?, employment_status = ?, ssn = ?, created_date = ? WHERE id = ?";

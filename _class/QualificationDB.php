@@ -104,7 +104,9 @@ class QualificationDB {
 			$this->get_expiration_date(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO qualification(id, employee_id, applicant_id, degree_cert, certification_id, effective_date, expiration_date) VALUES (null, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE qualification SET id = ?, employee_id = ?, applicant_id = ?, degree_cert = ?, certification_id = ?, effective_date = ?, expiration_date = ? WHERE id = ?";

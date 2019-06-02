@@ -124,7 +124,9 @@ class EmploymentBackgroundDB {
 			$this->get_supervisor_name(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO employment_background(id, applicant_id, employee_id, from_date, to_date, institution, job_title, reason_for_leaving, supervisor_name) VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE employment_background SET id = ?, applicant_id = ?, employee_id = ?, from_date = ?, to_date = ?, institution = ?, job_title = ?, reason_for_leaving = ?, supervisor_name = ? WHERE id = ?";

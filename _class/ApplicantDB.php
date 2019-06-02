@@ -154,7 +154,9 @@ class ApplicantDB {
 			$this->get_expires(),
 		);
 
-		if (!$this->id) {
+		if ($this->get_id() == null) {
+			unset($params[0]);
+			$params = array_values($params);
 			$sql = "INSERT INTO applicant(id, first_name, last_name, mid_init, email, date_of_birth, ssn, created_date, password, selector, token, expires) VALUES (null, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		} else {
 			$sql = "UPDATE applicant SET id = ?, first_name = ?, last_name = ?, mid_init = ?, email = ?, date_of_birth = ?, ssn = ?, created_date = ?, password = ?, selector = ?, token = ?, expires = ? WHERE id = ?";
