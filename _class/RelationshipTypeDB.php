@@ -5,12 +5,10 @@ namespace App\Libraries;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class JobsAssignmentDB {
+class RelationshipTypeDB {
 
 	private $id = null;
-	private $job_id = null;
-	private $employee_id = null;
-	private $assignment_date = null;
+	private $type = null;
 
 	public function set_id($id) {
 		$this->id = $id;
@@ -19,29 +17,15 @@ class JobsAssignmentDB {
 		return $this->id;
 	}
 
-	public function set_job_id($job_id) {
-		$this->job_id = $job_id;
+	public function set_type($type) {
+		$this->type = $type;
 	}
-	public function get_job_id() {
-		return $this->job_id;
-	}
-
-	public function set_employee_id($employee_id) {
-		$this->employee_id = $employee_id;
-	}
-	public function get_employee_id() {
-		return $this->employee_id;
-	}
-
-	public function set_assignment_date($assignment_date) {
-		$this->assignment_date = $assignment_date;
-	}
-	public function get_assignment_date() {
-		return $this->assignment_date;
+	public function get_type() {
+		return $this->type;
 	}
 
 	public static function lookup($where = '1', $params = array()) {
-		$sql = "SELECT * FROM jobs_assignment WHERE $where";
+		$sql = "SELECT * FROM relationship_type WHERE $where";
 
 		try{
 			 $dbh = DB::getPdo(); 
@@ -56,30 +40,26 @@ class JobsAssignmentDB {
 		return $sth->fetchAll(\PDO::FETCH_CLASS, get_class());
 	}
 
-	public static function populate($id = null, $job_id = null, $employee_id = null, $assignment_date = null) {
+	public static function populate($id = null, $type = null) {
 		$classname = get_class();
 		$item = new $classname();
 		$item->set_id($id);
-		$item->set_job_id($job_id);
-		$item->set_employee_id($employee_id);
-		$item->set_assignment_date($assignment_date);
+		$item->set_type($type);
 		return $item;
 	}
 
 	public function write() {
 		$params = array(
 			$this->get_id(),
-			$this->get_job_id(),
-			$this->get_employee_id(),
-			$this->get_assignment_date(),
+			$this->get_type(),
 		);
 
 		if ($this->get_id() == null) {
 			unset($params[0]);
 			$params = array_values($params);
-			$sql = "INSERT INTO jobs_assignment(id, job_id, employee_id, assignment_date) VALUES (null, ?, ?, ?)";
+			$sql = "INSERT INTO relationship_type(id, type) VALUES (null, ?)";
 		} else {
-			$sql = "UPDATE jobs_assignment SET id = ?, job_id = ?, employee_id = ?, assignment_date = ? WHERE id = ?";
+			$sql = "UPDATE relationship_type SET id = ?, type = ? WHERE id = ?";
 			$params[] = $this->id;
 		}
 
@@ -96,7 +76,7 @@ class JobsAssignmentDB {
 	}
 
 	public function delete() {
-		$sql = "DELETE FROM jobs_assignment WHERE id = ?";
+		$sql = "DELETE FROM relationship_type WHERE id = ?";
 		try{
 			$dbh = DB::getPdo(); 
 			$stmt = $dbh->prepare($sql);

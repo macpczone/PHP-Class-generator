@@ -129,7 +129,9 @@ class ClassGenerator
                 // id does not have value yet on insert
                 $list_as_question_marks[0] = "null";
 
-                $content .= "\t\tif (!\$this->$list_columns[0]) {\n";
+                $content .= "\t\tif (\$this->get_$list_columns[0]() == null) {\n";
+                $content .= "\t\t\tunset(\$params[0]);\n";
+                $content .= "\t\t\t\$params = array_values(\$params);\n";
                 $content .= "\t\t\t\$sql = \"INSERT INTO $table(" . implode(', ', $list_columns) .") VALUES (". implode(', ', $list_as_question_marks) . ")\";\n";
                 $content .= "\t\t} else {\n";
                 $content .= "\t\t\t\$sql = \"UPDATE $table SET " . implode(', ', $list_as_equals) . " WHERE " . $list_columns[0] . " = ?\";\n"; 
