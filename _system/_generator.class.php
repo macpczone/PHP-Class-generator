@@ -65,13 +65,19 @@ class ClassGenerator
 
                 foreach ($columns as $column) {
                     $str_column = str_replace($this->str_replace_column, '', $column);
-                    $content .= "\tprivate $$str_column = null;\n";
+                    $content .= "\tprivate $$str_column;\n";
                     $list_columns_var_val[] = "$$str_column = null";
                     $list_columns_var[] = "$$str_column";
                     $list_columns[] = $str_column;
                 }
 
                 $content .= "\n";
+                $content .= "\tfunction __construct() {\n";
+                foreach ($columns as $column) {
+                    $str_column = str_replace($this->str_replace_column, '', $column);
+                    $content .= "\t\t\$this->$str_column = null;\n";
+                }
+                $content .= "\t}\n\n";
    
                 foreach ($columns as $column) {
                     // setters
@@ -92,22 +98,22 @@ class ClassGenerator
                 
                 // try catch
                 $content .= "\t\ttry{\n";
-                $content .= "\t\t\t \$dbh = DB::getPdo(); \n";
-                $content .= "\t\t\t \$sth = \$dbh->prepare(\$sql); \n";
-                $content .= "\t\t\t \$sth->execute(\$params); \n";
+                $content .= "\t\t\t\$dbh = DB::getPdo(); \n";
+                $content .= "\t\t\t\$sth = \$dbh->prepare(\$sql); \n";
+                $content .= "\t\t\t\$sth->execute(\$params); \n";
                 $content .= "\t\t} catch(\PDOException \$e) {\n";
                 $content .= "\t\t\tLog::info(\$sql); \n";
                 $content .= "\t\t\tLog::info(\"Failed to execute query\"); \n";
+                $content .= "\t\t\tLog::info(\$e->getMessage());\n";
                 $content .= "\t\t\treturn false; \n";
                 $content .= "\t\t}\n\n";
                 
-                $content .= "\t\treturn \$sth->fetchAll(\PDO::FETCH_CLASS, get_class());\n";
+                $content .= "\t\treturn \$sth->fetchAll(\PDO::FETCH_CLASS, '$class');\n";
                 $content .= "\t}\n\n";
 
                 // populate
                 $content .= "\tpublic static function populate(". implode(', ', $list_columns_var_val) .") {\n"; 
-                $content .= "\t\t\$classname = get_class();\n";
-                $content .= "\t\t\$item = new \$classname();\n";
+                $content .= "\t\t\$item = new $class();\n";
                 foreach ($columns as $column) {
                     $str_column = str_replace($this->str_replace_column, '', $column);
                     $content .= "\t\t\$item->set_$str_column($$str_column);\n";
@@ -145,6 +151,7 @@ class ClassGenerator
                 $content .= "\t\t} catch(\PDOException \$e) {\n";
                 $content .= "\t\t\tLog::info(\$sql); \n";
                 $content .= "\t\t\tLog::info(\"Failed to execute query\"); \n";
+                $content .= "\t\t\tLog::info(\$e->getMessage());\n";
                 $content .= "\t\t\treturn false; \n";
                 $content .= "\t\t}\n";
                 $content .= "\t\treturn true; \n";
@@ -160,9 +167,10 @@ class ClassGenerator
                 $content .= "\t\t\t\$stmt = \$dbh->prepare(\$sql);\n";
                 $content .= "\t\t\t\$stmt->execute(array(\$this->" . $list_columns[0] ."));\n";
                 $content .= "\t\t} catch(\PDOException \$e) {\n";
-                $content .= "\t\t\t Log::info(\$sql); \n";
-                $content .= "\t\t\t Log::info(\"Failed to execute query\"); \n";
-                $content .= "\t\t\t return false; \n";
+                $content .= "\t\t\tLog::info(\$sql); \n";
+                $content .= "\t\t\tLog::info(\"Failed to execute query\"); \n";
+                $content .= "\t\t\tLog::info(\$e->getMessage());\n";
+                $content .= "\t\t\treturn false; \n";
                 $content .= "\t\t}\n";
                 $content .= "\t\treturn true; \n";
                 $content .= "\t}\n";
