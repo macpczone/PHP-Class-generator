@@ -14,9 +14,9 @@ define('DOCUMENT_ROOT', dirname(__FILE__) . '/../');
 define('CLASSGENERATOR_DIR', DOCUMENT_ROOT . '_class/');
 
 define('dbhostname', 'localhost');
-define('dbdatabase', 'bethesda_mission');
+define('dbdatabase', 'capstone_project');
 define('dbusername', 'root');
-define('dbpassword', '');
+define('dbpassword', 'root');
 define('dbtype', 'mysql');
 
 include '_database.class.php';
