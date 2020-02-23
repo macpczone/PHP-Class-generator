@@ -108,7 +108,7 @@ class ClassGenerator
                 $content .= "\t\t\treturn false; \n";
                 $content .= "\t\t}\n\n";
                 
-                $content .= "\t\treturn \$sth->fetchAll(\PDO::FETCH_CLASS, '$class');\n";
+                $content .= "\t\treturn \$sth->fetchAll(\PDO::FETCH_CLASS, get_class());\n";
                 $content .= "\t}\n\n";
 
                 // populate
