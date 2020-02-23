@@ -107,8 +107,8 @@ class ClassGenerator
                 $content .= "\t\t\tLog::info(\$e->getMessage());\n";
                 $content .= "\t\t\treturn false; \n";
                 $content .= "\t\t}\n\n";
-                
-                $content .= "\t\treturn \$sth->fetchAll(\PDO::FETCH_CLASS, get_class());\n";
+                $content .= "\t\t\$sth->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, get_class());\n";            
+                $content .= "\t\treturn \$sth->fetchAll();\n";
                 $content .= "\t}\n\n";
 
                 // populate
