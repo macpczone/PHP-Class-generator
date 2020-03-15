@@ -71,12 +71,24 @@ class ClassGenerator
                     $list_columns[] = $str_column;
                 }
 
+                $content .= "\tprotected \$ext_props = array();\n";
+
                 $content .= "\n";
                 $content .= "\tfunction __construct() {\n";
                 foreach ($columns as $column) {
                     $str_column = str_replace($this->str_replace_column, '', $column);
                     $content .= "\t\t\$this->$str_column = null;\n";
                 }
+                $content .= "\t}\n\n";
+
+                $content .= "\tpublic function createProperty(\$var_name, \$val) { \n";
+                $content .= "\t\t\$this->ext_props[\$var_name] = \$val; \n";
+                $content .= "\t}\n";
+
+                $content .= "\tpublic function __get(\$name) { \n";
+                $content .= "\t\tif(isset(\$this->ext_props[\$name])) {\n";
+                $content .= "\t\t\treturn \$this->ext_props[\$name]; \n";
+                $content .= "\t\t}\n";
                 $content .= "\t}\n\n";
    
                 foreach ($columns as $column) {
