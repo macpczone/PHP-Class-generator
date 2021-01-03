@@ -1,0 +1,22 @@
+{
+    "name": "farma/dietasg-entities",
+    "description": "Database based entities for Dietasg project.",
+    "version": "1.0.0-dev",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Ekain Agirrezabal",
+            "email": "eagirrezabal@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Dietasg\\Entities\\": "Entities/"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": "php class-generator.php",
+        "post-update-cmd": "php class-generator.php"
+    }
+}
