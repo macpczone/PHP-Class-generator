@@ -17,6 +17,9 @@ class ClassGenerator
     private $str_replace_file = array();
     private $str_replace_column = array(' ', '-');
     private $skip_table = array();
+    private $skip_table_with_prefix = 'wp_';
+    
+    private static $NAMESPACE = 'Dietasg\Entities';
 
     public function ClassGenerator()
     {
@@ -26,7 +29,8 @@ class ClassGenerator
     private function generateClasses($tables)
     {
         foreach ($tables as $table => $table_type) {
-            if (!in_array($table, $this->skip_table)) {
+            if (!in_array($table, $this->skip_table) 
+                    && substr_compare($table, $this->skip_table_with_prefix, 0, 3)) {
                 $class = str_replace($this->str_replace, '', $table);
                 $class = preg_replace('/[0-9]+/', '', $class);
                 if ($table == 'produit') {
@@ -40,6 +44,8 @@ class ClassGenerator
                 $content .= ' * ' . str_replace($this->str_replace_file, '', $table) . '.class.php' . NL;
                 $content .= ' * ' . $this->getTableComment($table) . NL;
                 $content .= ' **/' . NL;
+
+                $content .= 'namespace ' . self::$NAMESPACE . ';' . NL . NL;
 
                 /***********************************************************************
                  * CLASS
