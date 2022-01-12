@@ -1,0 +1,4 @@
+/nbproject/private/
+/vendor/
+/Entities/*.*
+/_system/_db_config.inc.php
