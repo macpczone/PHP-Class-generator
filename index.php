@@ -21,9 +21,13 @@ elseif (isset($_POST['submit-form'])) {
 	$generate = TRUE;
 }else { $generate = FALSE; }
 
+//echo $generate . "If nothing before this, the generate is empty\n";
+
 if ($generate===TRUE) {
 	if (dbhostname != '' && dbdatabase != '' && dbusername != '') {
+	echo $dsn . "Before new classgen<br>";
 			$structy_obj = new ClassGenerator();
+	echo $dsn . "After new classgen<br>";
 			if ($structy_obj->getException() != '')
 				$message = $structy_obj->getException();
 	} else
@@ -32,13 +36,15 @@ if ($generate===TRUE) {
 	if ($message == '') {
 		$message = NO_EXCEPTION;
 	}
-}
 
 try {
-    $dbh = new PDO('mysql:host=' . dbhostname . ';dbname=' . dbdatabase, dbusername, dbpassword);
+	$dsn="mysql:host=" . dbhostname . ";dbname=" . dbdatabase;
+	echo $dsn . "<br>";
+    $dbh = new PDO($dsn, dbusername, dbpassword);
 } catch (PDOException $e) {
     print "Error!: " . $e->getMessage() . "<br/>";
     die();
+}
 }
 
 if (php_sapi_name() !== 'cli') {

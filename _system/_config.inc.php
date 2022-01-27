@@ -3,7 +3,8 @@
 // Settings
 ini_set('error_reporting', E_ALL ^ E_NOTICE);
 ini_set('display_errors', 'on');
-date_default_timezone_set('Europe/Paris');
+ini_set('display_startup_errors', 1);
+date_default_timezone_set('Europe/London');
 
 // Constants
 define('AUTHOR', 'Ekain Agirrezabal');
@@ -15,7 +16,7 @@ define('DOCUMENT_ROOT', dirname(__FILE__) . '/../');
 define('CLASSGENERATOR_DIR', DOCUMENT_ROOT . 'Entities/');
 
 // Database credentials
-include '_db_config.inc.php';
+//include '_db_config.inc.php';
 
 
 include '_database.class.php';
